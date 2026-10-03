@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#2563eb">
+<title>Sistem Absensi Manajemen Informatika</title>
+
+<!-- Library QR Scanner/Generator -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+:root{
+  --primary:#2563eb;--primary2:#7c3aed;--bg:#f4f7fb;--card:#fff;
+  --text:#0f172a;--muted:#64748b;--line:#e2e8f0;--success:#10b981;
+  --danger:#ef4444;--warning:#f59e0b;--shadow:0 18px 50px rgba(15,23,42,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;background:
+  radial-gradient(circle at 0 0,rgba(37,99,235,.10),transparent 28%),
+  radial-gradient(circle at 100% 0,rgba(124,58,237,.10),transparent 25%),var(--bg);
+  color:var(--text);min-height:100vh
+}
+button,input,select{font:inherit}
+button{border:0;cursor:pointer}
+.hidden{display:none!important}
+.app{display:none;min-height:100vh}
+.login{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(135deg,#0f172a 0%,#172554 48%,#4c1d95 100%);
+  position:relative;overflow:hidden
+}
+.login:before,.login:after{content:"";position:absolute;border-radius:50%;filter:blur(2px);opacity:.22}
+.login:before{width:420px;height:420px;background:#60a5fa;top:-160px;right:-120px}
+.login:after{width:350px;height:350px;background:#c084fc;bottom:-150px;left:-120px}
+.login-box{position:relative;z-index:2;width:min(460px,100%);padding:32px;border-radius:28px;
+  background:rgba(255,255,255,.96);box-shadow:0 35px 90px rgba(0,0,0,.35);backdrop-filter:blur(20px)}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.brand-icon,.avatar{display:grid;place-items:center;border-radius:18px;color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:0 12px 28px rgba(37,99,235,.28)}
+.brand-icon{width:58px;height:58px;font-size:28px}
+.brand h1{font-size:21px}.brand p{font-size:12px;color:var(--muted);margin-top:3px}
+.login-title{font-size:30px;margin:8px 0 6px}.login-sub{color:var(--muted);margin-bottom:20px}
+.welcome-banner{
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:15px;
+  padding:18px;margin:-4px -4px 22px;border-radius:22px;
+  background:linear-gradient(135deg,#eff6ff 0%,#eef2ff 48%,#f5f3ff 100%);
+  border:1px solid #dbeafe;
+}
+.welcome-banner:after{
+  content:"";position:absolute;width:110px;height:110px;border-radius:50%;
+  right:-42px;top:-48px;background:rgba(124,58,237,.10);
+}
+.welcome-icon{
+  flex:0 0 54px;width:54px;height:54px;border-radius:17px;
+  display:grid;place-items:center;font-size:27px;color:#fff;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  box-shadow:0 10px 25px rgba(79,70,229,.25);
+  animation:welcomePulse 2.5s ease-in-out infinite;
+}
+.welcome-kicker{
+  font-size:10px;font-weight:900;letter-spacing:2px;color:#4f46e5;margin-bottom:2px;
+}
+@keyframes welcomePulse{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  50%{transform:translateY(-3px) rotate(2deg)}
+}
+
+.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:700;font-size:13px;margin-bottom:8px}
+.input-wrap{position:relative}.input-wrap span{position:absolute;left:14px;top:12px;font-size:18px}
+.input-wrap input{padding-left:44px}
+input,select{
+  width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:13px;
+  outline:none;background:#fff;color:var(--text);transition:.2s
+}
+input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(37,99,235,.10)}
+.btn{padding:12px 16px;border-radius:13px;font-weight:800;transition:.2s;display:inline-flex;
+  align-items:center;justify-content:center;gap:8px}
+.btn:hover{transform:translateY(-1px)}.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+.btn-success{background:var(--success);color:#fff}.btn-danger{background:var(--danger);color:#fff}
+.btn-light{background:#eef2ff;color:#3730a3}.btn-muted{background:#e2e8f0;color:#334155}
+.btn-block{width:100%}.error{padding:12px;border-radius:12px;background:#fee2e2;color:#991b1b;margin:12px 0;display:none;font-size:13px}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.role-btn{padding:24px 15px;border:1px solid var(--line);border-radius:20px;background:#fff;text-align:center;
+  transition:.2s;font-weight:800}.role-btn:hover{border-color:#93c5fd;transform:translateY(-3px);box-shadow:var(--shadow)}
+.role-btn .big{font-size:34px;display:block;margin-bottom:9px}.small-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.demo{margin-top:20px;padding:12px;border-radius:14px;background:#f8fafc;color:#64748b;font-size:12px;line-height:1.6}
+
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:rgba(15,23,42,.98);color:#cbd5e1;padding:20px 14px;z-index:50}
+.side-brand{display:flex;align-items:center;gap:10px;padding:8px 10px 22px;color:#fff}
+.side-brand .brand-icon{width:42px;height:42px;font-size:20px;border-radius:13px}
+.side-brand strong{font-size:14px}.side-brand small{display:block;color:#94a3b8;margin-top:3px}
+.nav{display:grid;gap:6px}.nav button{width:100%;background:transparent;color:#cbd5e1;text-align:left;padding:13px 14px;border-radius:12px;font-weight:700}
+.nav button:hover,.nav button.active{background:rgba(96,165,250,.14);color:#fff}
+.side-bottom{position:absolute;left:14px;right:14px;bottom:18px}
+.main{margin-left:260px;min-height:100vh}
+.topbar{height:74px;background:rgba(255,255,255,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:40}
+.top-left{display:flex;align-items:center;gap:12px}.hamb{display:none}.page-title h2{font-size:19px}.page-title p{font-size:12px;color:var(--muted);margin-top:3px}
+.user-chip{display:flex;align-items:center;gap:10px}.avatar{width:40px;height:40px;border-radius:12px;font-weight:900}
+.user-chip b{font-size:13px}.user-chip span{display:block;font-size:11px;color:var(--muted)}
+.content{padding:26px;max-width:1500px;margin:auto}
+.hero{border-radius:25px;padding:28px;color:#fff;background:linear-gradient(120deg,#1d4ed8,#4f46e5 55%,#7c3aed);
+  box-shadow:0 20px 55px rgba(37,99,235,.22);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:280px;height:280px;border:55px solid rgba(255,255,255,.07);border-radius:50%;right:-100px;top:-110px}
+.hero h1{font-size:30px;margin-bottom:8px}.hero p{color:#dbeafe;max-width:700px;line-height:1.6}
+.hero-actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+.hero .btn-light{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.grid{display:grid;gap:18px}.stats{grid-template-columns:repeat(4,1fr);margin:20px 0}
+.card{background:rgba(255,255,255,.94);border:1px solid rgba(226,232,240,.8);border-radius:20px;box-shadow:var(--shadow);padding:20px}
+.stat-card{display:flex;align-items:center;justify-content:space-between}.stat-card .icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:22px;background:#eff6ff;color:var(--primary)}
+.stat-card strong{display:block;font-size:28px;margin-bottom:4px}.stat-card span{color:var(--muted);font-size:12px}
+.two{grid-template-columns:1.2fr .8fr}.three{grid-template-columns:repeat(3,1fr)}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}.card-head h3{font-size:17px}.muted{color:var(--muted);font-size:12px}
+.course-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.course{border:1px solid var(--line);padding:15px;border-radius:16px;background:linear-gradient(180deg,#fff,#f8fafc);transition:.2s}
+.course:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(15,23,42,.08)}
+.course .code{font-size:11px;color:#6366f1;font-weight:900}.course h4{font-size:14px;margin:6px 0}.course p{font-size:12px;color:var(--muted)}
+.progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:10px}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--primary2));border-radius:99px}
+.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick .btn{padding:16px 10px}
+.section{display:none}.section.active{display:block}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:15px}table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;white-space:nowrap}th{background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+tr:last-child td{border-bottom:0}.badge{display:inline-flex;padding:5px 9px;border-radius:99px;font-size:10px;font-weight:900}.badge.ok{background:#dcfce7;color:#166534}.badge.off{background:#fee2e2;color:#991b1b}
+.toolbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.toolbar .btn{align-self:end}
+.scanner-box{display:grid;grid-template-columns:1fr 1fr;gap:18px}.reader{min-height:300px;border:2px dashed #cbd5e1;border-radius:18px;padding:10px;background:#f8fafc}
+.scan-result{padding:14px;border-radius:14px;background:#eff6ff;color:#1e40af;font-size:13px;line-height:1.5;margin-top:12px}
+.qr-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:18px}.qr-preview{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:18px;padding:20px;text-align:center}
+#qrcode{display:flex;justify-content:center;margin:16px auto}.timer{font-size:42px;font-weight:900;letter-spacing:2px;margin:8px 0}.status{font-weight:900}.status.on{color:#059669}.status.off{color:#dc2626}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+.modal.show{display:flex}.modal-box{background:#fff;border-radius:22px;width:min(520px,100%);padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.toast{position:fixed;right:20px;bottom:20px;z-index:200;background:#0f172a;color:#fff;padding:14px 17px;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.2);transform:translateY(30px);opacity:0;pointer-events:none;transition:.3s;max-width:360px;font-size:13px}
+.toast.show{transform:none;opacity:1}.toast.success{background:#047857}.toast.error{background:#b91c1c}
+.empty{text-align:center;padding:35px;color:var(--muted);font-size:13px}
+.mobile-only{display:none}
+@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.two,.qr-layout{grid-template-columns:1fr}.toolbar{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:780px){
+  .sidebar{transform:translateX(-100%);transition:.25s}.sidebar.open{transform:none}.main{margin-left:0}.hamb{display:inline-flex;width:40px;height:40px;border-radius:12px;background:#eff6ff;color:#1d4ed8;align-items:center;justify-content:center}
+  .content{padding:18px}.topbar{padding:0 16px}.mobile-only{display:block}.course-grid,.scanner-box{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){.login-box{padding:22px}.role-grid,.stats,.quick,.toolbar{grid-template-columns:1fr}.hero h1{font-size:24px}.user-chip>div:last-child{display:none}.content{padding:12px}.card{padding:16px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login">
+  <div class="login-box">
+    <div class="brand">
+      <div class="brand-icon">🎓</div>
+      <div><h1>Absensi V1</h1><p>Manajemen Informatika • Sistem Absensi</p></div>
+    </div>
+
+    <div id="accountStep">
+      <div class="welcome-banner">
+        <div class="welcome-icon">✨</div>
+        <div>
+          <div class="welcome-kicker">ABSENSI V1</div>
+          <div class="login-title">Selamat Datang 👋</div>
+          <div class="login-sub">Kelola kehadiran perkuliahan dengan lebih cepat, mudah, dan modern.</div>
+        </div>
+      </div>
+      <div id="accountError" class="error"></div>
+      <div class="form-group">
+        <label>Username Website</label>
+        <div class="input-wrap"><span>👤</span><input id="username" autocomplete="username" placeholder="Masukkan username"></div>
+      </div>
+      <div class="form-group">
+        <label>Password Website</label>
+        <div class="input-wrap"><span>🔒</span><input id="password" type="password" autocomplete="current-password" placeholder="Masukkan password"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="loginWebsite()">Masuk ke Sistem →</button>
+      
+    </div>
+
+    <div id="roleStep" class="hidden">
+      <div class="login-title">Pilih Akses</div>
+      <div class="login-sub">Silakan pilih jenis akun yang akan digunakan.</div>
+      <div class="role-grid">
+        <button class="role-btn" onclick="chooseRole('mahasiswa')"><span class="big">🎓</span>Mahasiswa<small class="small-note">Login menggunakan NIM</small></button>
+        <button class="role-btn" onclick="chooseRole('dosen')"><span class="big">👨‍🏫</span>Dosen<small class="small-note">Login menggunakan NIP</small></button>
+      </div>
+      <button class="btn btn-muted btn-block" style="margin-top:15px" onclick="backAccount()">← Kembali</button>
+    </div>
+
+    <div id="idStep" class="hidden">
+      <div class="login-title" id="idTitle">Login</div>
+      <div class="login-sub" id="idSub">Masukkan ID akun.</div>
+      <div id="idError" class="error"></div>
+      <div class="form-group">
+        <label id="idLabel">ID</label>
+        <div class="input-wrap"><span>🪪</span><input id="roleId" inputmode="numeric" placeholder="Masukkan ID"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="loginRole()">Login Sekarang →</button>
+      <button class="btn btn-muted btn-block" style="margin-top:8px" onclick="backRole()">← Pilih Role Lain</button>
+      <div class="demo" id="roleHint"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+  <aside id="sidebar" class="sidebar">
+    <div class="side-brand">
+      <div class="brand-icon">🎓</div>
+      <div><strong>Absensi V1</strong><small>Manajemen Informatika</small></div>
+    </div>
+    <nav id="nav" class="nav"></nav>
+    <div class="side-bottom">
+      <button class="btn btn-muted btn-block" onclick="logout()">↪ Keluar</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <button class="hamb" onclick="toggleSidebar()">☰</button>
+        <div class="page-title"><h2 id="pageTitle">Dashboard</h2><p id="pageSub">Sistem Absensi Digital</p></div>
+      </div>
+      <div class="user-chip">
+        <button class="btn btn-muted" onclick="toggleTheme()" title="Mode gelap/terang">🌙</button>
+        <div class="avatar" id="topAvatar">U</div>
+        <div><b id="topName">User</b><span id="topRole">Pengguna</span></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- MAHASISWA -->
+      <section id="studentDashboard" class="section">
+        <div class="hero">
+          <h1 id="studentWelcome">Halo, Mahasiswa! 👋</h1>
+          <p>Kelola kehadiran, scan QR absensi, lihat mata kuliah, dan pantau rekap kehadiran dari satu dashboard.</p>
+          <div class="hero-actions">
+            <button class="btn btn-light" onclick="showSection('studentScan')">📷 Scan Absensi</button>
+            <button class="btn btn-light" onclick="showSection('studentHistory')">📊 Lihat Riwayat</button>
+          </div>
+        </div>
+
+        <div class="grid stats">
+          <div class="card stat-card"><div><strong id="sTotal">0</strong><span>Total Kehadiran</span></div><div class="icon">✅</div></div>
+          <div class="card stat-card"><div><strong id="sCourses">0</strong><span>Mata Kuliah Diikuti</span></div><div class="icon">📚</div></div>
+          <div class="card stat-card"><div><strong id="sPercent">0%</strong><span>Persentase Kehadiran</span></div><div class="icon">📈</div></div>
+          <div class="card stat-card"><div><strong id="sLast">-</strong><span>Absensi Terakhir</span></div><div class="icon">🕐</div></div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="card-head"><div><h3>📚 Mata Kuliah</h3><span class="muted">Jadwal dan dosen pengajar</span></div></div>
+            <div id="studentCourses" class="course-grid"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h3>⚡ Akses Cepat</h3><span class="muted">Menu yang sering digunakan</span></div></div>
+            <div class="quick">
+              <button class="btn btn-primary" onclick="showSection('studentScan')">📷 Scan QR</button>
+              <button class="btn btn-light" onclick="showSection('studentProfile')">👤 Profil</button>
+              <button class="btn btn-light" onclick="showSection('studentHistory')">📋 Riwayat</button>
+              <button class="btn btn-light" onclick="exportStudentCSV()">⬇️ Export</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="studentScan" class="section">
+        <div class="card">
+          <div class="card-head"><div><h3>📷 Scan QR Absensi</h3><span class="muted">Arahkan kamera ke QR yang dibuat dosen</span></div></div>
+          <div class="scanner-box">
+            <div>
+              <div id="reader" class="reader"></div>
+              <div id="scanResult" class="scan-result">Tekan <b>Mulai Kamera</b> untuk memulai scan.</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                <button class="btn btn-primary" onclick="startScanner()">📷 Mulai Kamera</button>
+                <button class="btn btn-danger" onclick="stopScanner()">⛔ Stop</button>
+              </div>
+            </div>
+            <div class="card" style="box-shadow:none;background:#f8fafc">
+              <h3 style="margin-bottom:12px">Cara Absen</h3>
+              <ol style="padding-left:20px;color:#475569;line-height:2;font-size:13px">
+                <li>Pastikan nama mahasiswa sudah benar.</li><li>Tekan tombol Mulai Kamera.</li>
+                <li>Arahkan kamera ke QR dosen.</li><li>Tunggu notifikasi absensi berhasil.</li>
+              </ol>
+              <div class="demo" style="margin-top:15px">QR yang kedaluwarsa atau absensi yang sama pada pertemuan yang sama akan ditolak otomatis.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="studentHistory" class="section">
+        <div class="card">
+          <div class="card-head"><div><h3>📊 Riwayat Kehadiran</h3><span class="muted">Riwayat pribadi mahasiswa</span></div><button class="btn btn-light" onclick="exportStudentCSV()">⬇️ Export CSV</button></div>
+          <div class="table-wrap"><table><thead><tr><th>No</th><th>Mata Kuliah</th><th>Pertemuan</th><th>Waktu</th><th>Dosen</th><th>Status</th></tr></thead><tbody id="studentTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="studentProfile" class="section">
+        <div class="card">
+          <div class="card-head"><div><h3>👤 Profil Mahasiswa</h3><span class="muted">Data yang tersimpan di browser ini</span></div></div>
+          <div class="grid two">
+            <div><div class="form-group"><label>NIM</label><input id="profileNim" readonly></div><div class="form-group"><label>Nama</label><input id="profileName"></div><button class="btn btn-primary" onclick="saveStudentName()">💾 Simpan Perubahan</button></div>
+            <div class="card" style="box-shadow:none;background:#f8fafc"><h3>🎓 Status Akademik</h3><p class="muted" style="margin-top:8px;line-height:1.7">Program: Manajemen Informatika<br>Status: Mahasiswa Aktif<br>Sistem: Absensi Digital</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOSEN -->
+      <section id="lecturerDashboard" class="section">
+        <div class="hero">
+          <h1 id="lecturerWelcome">Dashboard Dosen 👨‍🏫</h1>
+          <p>Buat QR absensi, pantau mahasiswa yang hadir secara real-time, filter data, dan export rekap.</p>
+          <div class="hero-actions"><button class="btn btn-light" onclick="showSection('lecturerQR')">✨ Buat QR Absensi</button><button class="btn btn-light" onclick="showSection('lecturerAttendance')">📊 Lihat Rekap</button></div>
+        </div>
+        <div class="grid stats">
+          <div class="card stat-card"><div><strong id="dTotal">0</strong><span>Total Data Absensi</span></div><div class="icon">📝</div></div>
+          <div class="card stat-card"><div><strong id="dUnique">0</strong><span>Mahasiswa Unik</span></div><div class="icon">👥</div></div>
+          <div class="card stat-card"><div><strong id="dCourses">5</strong><span>Mata Kuliah</span></div><div class="icon">📚</div></div>
+          <div class="card stat-card"><div><strong id="dStatus">OFF</strong><span>Status QR</span></div><div class="icon">🔐</div></div>
+        </div>
+        <div class="grid two">
+          <div class="card"><div class="card-head"><div><h3>⚡ Akses Cepat</h3><span class="muted">Pengelolaan absensi</span></div></div><div class="quick">
+            <button class="btn btn-primary" onclick="showSection('lecturerQR')">✨ Buat QR</button><button class="btn btn-light" onclick="showSection('lecturerAttendance')">📋 Rekap</button>
+            <button class="btn btn-light" onclick="exportLecturerCSV()">⬇️ Export CSV</button><button class="btn btn-light" onclick="clearAllAttendance()">🗑️ Reset Data</button>
+          </div></div>
+          <div class="card"><div class="card-head"><div><h3>🔐 Akun Dosen</h3><span class="muted">Informasi login aktif</span></div></div><p style="line-height:1.9;font-size:13px">NIP: <b id="dashNip">-</b><br>Nama: <b id="dashDosen">-</b><br>Hak akses: <b>Dosen / Pengajar</b></p></div>
+        </div>
+      </section>
+
+      <section id="lecturerQR" class="section">
+        <div class="card">
+          <div class="card-head"><div><h3>✨ Generator QR Absensi</h3><span class="muted">QR aktif sesuai durasi yang dipilih</span></div></div>
+          <div class="qr-layout">
+            <div>
+              <div class="form-group"><label>Dosen Pengajar</label><select id="lecturerSelect" onchange="syncLecturerName()"></select></div>
+              <div class="form-group"><label>Nama Dosen</label><input id="namaDosen" readonly></div>
+              <div class="form-group"><label>Mata Kuliah</label><select id="qrCourse"></select></div>
+              <div class="form-group"><label>Pertemuan</label><select id="qrMeeting"></select></div>
+              <div class="form-group"><label>Durasi QR</label><select id="qrDuration"><option value="5">5 menit</option><option value="10" selected>10 menit</option><option value="15">15 menit</option><option value="30">30 menit</option><option value="60">60 menit</option></select></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" onclick="generateQR()">🚀 Buat QR</button><button class="btn btn-danger" onclick="closeQR()">⛔ Tutup Absensi</button></div>
+            </div>
+            <div class="qr-preview">
+              <div class="muted">QR ABSENSI AKTIF</div><h3 id="qrTitle" style="margin-top:6px">Belum ada sesi</h3>
+              <div id="qrcode"><span class="empty">QR akan tampil di sini</span></div>
+              <div class="timer" id="qrTimer">00:00</div><div class="status off" id="qrStatus">🔴 Absensi Ditutup</div>
+              <div class="demo">Token: <b id="qrToken">-</b></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="lecturerAttendance" class="section">
+        <div class="card">
+          <div class="card-head"><div><h3>📊 Rekap Absensi Mahasiswa</h3><span class="muted">Data tersimpan di localStorage browser</span></div><div style="display:flex;gap:8px"><button class="btn btn-light" onclick="refreshLecturer()">↻ Refresh</button><button class="btn btn-success" onclick="exportLecturerCSV()">⬇️ CSV</button></div></div>
+          <div class="toolbar">
+            <select id="filterCourse" onchange="renderLecturerTable()"><option value="">Semua Mata Kuliah</option></select>
+            <select id="filterMeeting" onchange="renderLecturerTable()"><option value="">Semua Pertemuan</option></select>
+            <select id="filterLecturer" onchange="renderLecturerTable()"><option value="">Semua Dosen</option></select>
+            <input id="searchStudent" oninput="renderLecturerTable()" placeholder="🔎 Cari NIM / nama">
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap"><span class="badge ok">Total: <b id="foundTotal" style="margin-left:4px">0</b></span><span class="badge" style="background:#e0e7ff;color:#3730a3">Mahasiswa unik: <b id="foundUnique" style="margin-left:4px">0</b></span><button class="btn btn-muted" onclick="resetFilters()">Reset Filter</button></div>
+          <div class="table-wrap"><table><thead><tr><th>No</th><th>NIM</th><th>Nama</th><th>Mata Kuliah</th><th>Pertemuan</th><th>Waktu</th><th>Dosen</th><th>Status</th></tr></thead><tbody id="lecturerTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="lecturerCourses" class="section">
+        <div class="card"><div class="card-head"><div><h3>📚 Daftar Mata Kuliah</h3><span class="muted">Mata kuliah yang tersedia di sistem</span></div></div><div id="lecturerCourseCards" class="course-grid"></div></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* =========================================================
+   KONFIGURASI
+   ========================================================= */
+const WEBSITE_USER="user", WEBSITE_PASS="123";
+const STUDENT_SPECIAL={"202511022":"Rayhan alfareza"};
+const LECTURERS=[
+  "I KETUT PUTRA YASA, S.kom",
+  "Ishak, S.Pd., MM",
+  "HERIYANTO SAHIDU, S.Sos., S.Kom., M.M.",
+  "TRISNO WIBOWO K.",
+  "HERIYANTO SAHIDU, S.Sos., S.Kom, M.M.",
+  "YANTO NAIM"
+];
+
+const LECTURER_ACCOUNTS={
+  "200001":"I KETUT PUTRA YASA, S.kom",
+  "200002":"Ishak, S.Pd., MM",
+  "200003":"HERIYANTO SAHIDU, S.Sos., S.Kom., M.M.",
+  "200004":"TRISNO WIBOWO K.",
+  "200005":"HERIYANTO SAHIDU, S.Sos., S.Kom, M.M.",
+  "200006":"YANTO NAIM"
+};
+const COURSES=[
+  {name:"Komunikasi data dan jaringan",code:"MI-01",lecturer:"TRISNO WIBOWO K."},
+  {name:"Sistem pendukung keputusan",code:"MI-02",lecturer:"I KETUT PUTRA YASA"},
+  {name:"Pemograman web 1",code:"MI-03",lecturer:"YANTO NAIM"},
+  {name:"Anti korupsi",code:"MI-04",lecturer:"HERIYANTO SAHIDU, S.Sos., S.Kom., M.M."},
+  {name:"Bahasa indonesia",code:"MI-05",lecturer:"Ishak, S.Pd., MM"}
+];
+let role=null,scanner=null,qrTimer=null,qrEnd=0,activeSession=null,currentSection="";
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const getData=()=>{try{return JSON.parse(localStorage.getItem("attendanceData")||"[]")}catch{return[]}};
+const saveData=d=>{localStorage.setItem("attendanceData",JSON.stringify(d));try{new BroadcastChannel("absensi-channel").postMessage("update")}catch{}};
+function toast(msg,type="success"){const t=$("toast");t.textContent=msg;t.className="toast show "+type;clearTimeout(window.toastT);window.toastT=setTimeout(()=>t.className="toast",2800)}
+function studentName(nim){return STUDENT_SPECIAL[nim]||localStorage.getItem("namaMahasiswa_"+nim)||""}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+function loginWebsite(){
+  if($("username").value.trim()!==WEBSITE_USER||$("password").value!==WEBSITE_PASS){
+    $("accountError").textContent="Username atau password salah."; $("accountError").style.display="block"; return;
+  }
+  $("accountError").style.display="none"; $("accountStep").classList.add("hidden"); $("roleStep").classList.remove("hidden");
+}
+function backAccount(){$("roleStep").classList.add("hidden");$("accountStep").classList.remove("hidden")}
+function chooseRole(r){
+  role=r;$("roleStep").classList.add("hidden");$("idStep").classList.remove("hidden");$("roleId").value="";
+  $("idTitle").textContent=r==="mahasiswa"?"Login Mahasiswa 🎓":"Login Dosen 👨‍🏫";
+  $("idSub").textContent=r==="mahasiswa"?"Masukkan NIM untuk masuk ke dashboard mahasiswa.":"Masukkan NIP untuk masuk ke dashboard dosen.";
+  $("idLabel").textContent=r==="mahasiswa"?"NIM":"NIP";
+  $("roleId").placeholder=r==="mahasiswa"?"Contoh: 202511022":"Contoh: 200001";
+  $("roleHint").innerHTML=r==="mahasiswa"
+  ?"NIM yang diterima: <b>202511001–202511099</b><br>NIM 202511022 otomatis: <b>Rayhan alfareza</b>"
+  :"NIP dosen: <b>200001–200006</b><br>Nama dosen akan otomatis dipilih sesuai NIP.";
+  $("roleId").focus();
+}
+function backRole(){$("idStep").classList.add("hidden");$("roleStep").classList.remove("hidden")}
+function loginRole(){
+  const id=$("roleId").value.trim(),err=$("idError");
+  if(role==="mahasiswa"){
+    const n=Number(id);
+    if(!/^\d{9}$/.test(id)||n<202511001||n>202511099){err.textContent="NIM harus 202511001 sampai 202511099.";err.style.display="block";return}
+  }else if(!LECTURER_ACCOUNTS[id]){
+    err.textContent="NIP belum terdaftar. Gunakan NIP 200001–200006.";
+    err.style.display="block";return
+  }
+  err.style.display="none";localStorage.setItem("userRole",role);localStorage.setItem("userId",id);
+  if(role==="dosen") localStorage.setItem("namaDosenAktif",LECTURER_ACCOUNTS[id]);
+  $("loginScreen").style.display="none";$("app").style.display="block";initApp();toast("Login berhasil. Selamat datang!","success");
+}
+function logout(){
+  stopScanner();if(qrTimer)clearInterval(qrTimer);localStorage.removeItem("userRole");localStorage.removeItem("userId");
+  $("app").style.display="none";$("loginScreen").style.display="flex";$("idStep").classList.add("hidden");$("roleStep").classList.add("hidden");$("accountStep").classList.remove("hidden");
+  $("username").value="";$("password").value="";
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+function initApp(){
+  role=localStorage.getItem("userRole");buildNav();
+  const id=localStorage.getItem("userId"),name=role==="mahasiswa"?studentName(id):(LECTURER_ACCOUNTS[id]||"Dosen");
+  $("topName").textContent=name||"Pengguna";$("topRole").textContent=role==="mahasiswa"?"Mahasiswa":"Dosen";
+  $("topAvatar").textContent=(name||"U").charAt(0).toUpperCase();
+  if(role==="mahasiswa"){
+    $("studentWelcome").textContent=`Halo, ${name||"Mahasiswa"}! 👋`;showSection("studentDashboard");initStudent();
+  }else{
+    $("lecturerWelcome").textContent=`Dashboard ${name} 👨‍🏫`;
+    $("dashNip").textContent=id;
+    $("dashDosen").textContent=name;
+    showSection("lecturerDashboard");initLecturer();
+  }
+}
+function buildNav(){
+  const items=role==="mahasiswa"?[
+    ["studentDashboard","🏠","Dashboard"],["studentScan","📷","Scan Absensi"],["studentHistory","📊","Riwayat Kehadiran"],["studentProfile","👤","Profil"]
+  ]:[
+    ["lecturerDashboard","🏠","Dashboard"],["lecturerQR","✨","Buat QR Absensi"],["lecturerAttendance","📊","Rekap Absensi"],["lecturerCourses","📚","Mata Kuliah"]
+  ];
+  $("nav").innerHTML=items.map(x=>`<button data-section="${x[0]}" onclick="showSection('${x[0]}')">${x[1]} &nbsp; ${x[2]}</button>`).join("");
+}
+function showSection(id){
+  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");currentSection=id;
+  const btn=document.querySelector(`[data-section="${id}"]`);document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));if(btn)btn.classList.add("active");
+  const title=btn?btn.textContent.replace(/^[^\w]*\s*/,"").trim():"Dashboard";$("pageTitle").textContent=title;
+  $("pageSub").textContent=role==="mahasiswa"?"Portal Mahasiswa • Absensi Digital":"Portal Dosen • Pengelolaan Absensi";
+  $("sidebar").classList.remove("open");
+  if(id==="studentHistory")renderStudentTable();if(id==="lecturerAttendance")renderLecturerTable();
+}
+function toggleSidebar(){$("sidebar").classList.toggle("open")}
+function toggleTheme(){document.body.classList.toggle("dark-mode");toast("Mode tampilan diubah")}
+
+/* =========================================================
+   MAHASISWA
+   ========================================================= */
+function initStudent(){
+  const nim=localStorage.getItem("userId"),name=studentName(nim);
+  $("profileNim").value=nim;$("profileName").value=name;
+  $("studentCourses").innerHTML=COURSES.map((c,i)=>`<div class="course"><span class="code">${c.code}</span><h4>${esc(c.name)}</h4><p>👨‍🏫 ${esc(c.lecturer)}</p><div class="progress"><i style="width:${[82,75,68,90,78][i]}%"></i></div><p style="margin-top:6px">${[82,75,68,90,78][i]}% target simulasi</p></div>`).join("");
+  updateStudentStats();renderStudentTable();
+}
+function saveStudentName(){
+  const nim=localStorage.getItem("userId"),v=$("profileName").value.trim();
+  if(nim==="202511022"){ $("profileName").value="Rayhan alfareza";toast("Nama NIM khusus tidak dapat diubah.","error");return}
+  if(!v){toast("Nama tidak boleh kosong.","error");return}
+  localStorage.setItem("namaMahasiswa_"+nim,v);$("topName").textContent=v;$("studentWelcome").textContent=`Halo, ${v}! 👋`;toast("Profil berhasil disimpan.");
+}
+function updateStudentStats(){
+  const nim=localStorage.getItem("userId"),d=getData().filter(x=>x.nim===nim),subs=[...new Set(d.map(x=>x.mataKuliah))];
+  $("sTotal").textContent=d.length;$("sCourses").textContent=subs.length;$("sPercent").textContent=d.length?"100%":"0%";
+  $("sLast").textContent=d.length?d[d.length-1].waktu.split(",")[0]:"-";
+}
+function renderStudentTable(){
+  const nim=localStorage.getItem("userId"),d=getData().filter(x=>x.nim===nim).reverse(),tb=$("studentTable");
+  if(!d.length){tb.innerHTML='<tr><td colspan="6" class="empty">Belum ada riwayat absensi.</td></tr>';return}
+  tb.innerHTML=d.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.mataKuliah)}</td><td>${esc(x.pertemuan)}</td><td>${esc(x.waktu)}</td><td>${esc(x.dosen||"-")}</td><td><span class="badge ok">✓ Hadir</span></td></tr>`).join("");
+}
+function startScanner(){
+  const nim=localStorage.getItem("userId");if(!studentName(nim)){toast("Masukkan nama mahasiswa terlebih dahulu.","error");showSection("studentProfile");return}
+  if(scanner)return;
+  scanner=new Html5Qrcode("reader");
+  scanner.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},onScanSuccess)
+  .catch(()=>{$("scanResult").textContent="❌ Kamera tidak dapat digunakan. Izinkan akses kamera browser.";toast("Kamera tidak tersedia.","error")});
+}
+function stopScanner(){if(scanner){scanner.stop().then(()=>{scanner.clear();scanner=null}).catch(()=>scanner=null)}}
+function onScanSuccess(text){
+  stopScanner();
+  try{
+    let d;if(String(text).startsWith("ABS|")){const p=String(text).split("|");if(p.length<6)throw Error();d={token:p[1],nip:p[2],mataKuliah:p[3],pertemuan:p[4],berakhir:Number(p[5])}}else d=JSON.parse(text);
+    if(!d.token||!d.mataKuliah||!d.pertemuan)throw Error();
+    if(d.berakhir&&Date.now()>d.berakhir){$("scanResult").textContent="⏰ QR absensi sudah kedaluwarsa.";return}
+    const nim=localStorage.getItem("userId"),data=getData();
+    if(data.some(x=>x.nim===nim&&x.mataKuliah===d.mataKuliah&&String(x.pertemuan)===String(d.pertemuan))){
+      $("scanResult").textContent="⚠️ Anda sudah absen pada mata kuliah dan pertemuan ini.";return
+    }
+    const dosen=COURSES.find(c=>c.name===d.mataKuliah)?.lecturer||"I ketut Putra yasa";
+    data.push({nim,nama:studentName(nim),mataKuliah:d.mataKuliah,pertemuan:String(d.pertemuan),waktu:new Date().toLocaleString("id-ID"),dosen,status:"Hadir"});
+    saveData(data);$("scanResult").innerHTML=`✅ <b>Absensi berhasil!</b><br>${esc(d.mataKuliah)} • Pertemuan ${esc(d.pertemuan)}`;
+    updateStudentStats();renderStudentTable();toast("Absensi berhasil dicatat.");
+  }catch{$("scanResult").textContent="❌ QR tidak valid.";toast("QR tidak valid.","error")}
+}
+function exportStudentCSV(){
+  const nim=localStorage.getItem("userId"),d=getData().filter(x=>x.nim===nim);
+  downloadCSV([["No","NIM","Nama","Mata Kuliah","Pertemuan","Waktu","Dosen","Status"],...d.map((x,i)=>[i+1,x.nim,x.nama,x.mataKuliah,x.pertemuan,x.waktu,x.dosen||"-",x.status||"Hadir"])] ,"Rekap_Absensi_Mahasiswa.csv");
+}
+
+/* =========================================================
+   DOSEN + QR
+   ========================================================= */
+function initLecturer(){
+  fillLecturerOptions();fillCourseOptions();fillMeetingOptions();
+  renderLecturerCourseCards();renderLecturerTable();updateLecturerStats();
+}
+function fillLecturerOptions(){
+  $("lecturerSelect").innerHTML=LECTURERS.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+  $("filterLecturer").innerHTML='<option value="">Semua Dosen</option>'+LECTURERS.map(x=>`<option>${esc(x)}</option>`).join("");
+  $("lecturerSelect").value=LECTURER_ACCOUNTS[localStorage.getItem("userId")]||"I KETUT PUTRA YASA, S.kom";
+  syncLecturerName();
+}
+function fillCourseOptions(){
+  const opts=COURSES.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("");
+  $("qrCourse").innerHTML=opts;$("filterCourse").innerHTML='<option value="">Semua Mata Kuliah</option>'+opts;
+}
+function fillMeetingOptions(){
+  let opts="";for(let i=1;i<=16;i++)opts+=`<option value="${i}">Pertemuan ${i}</option>`;
+  $("qrMeeting").innerHTML=opts;$("filterMeeting").innerHTML='<option value="">Semua Pertemuan</option>'+opts;
+}
+function syncLecturerName(){
+  const nip=localStorage.getItem("userId");
+  let v=LECTURER_ACCOUNTS[nip]||$("lecturerSelect").value;
+  $("namaDosen").value=v;
+  $("lecturerSelect").value=v;
+}
+function generateQR(){
+  syncLecturerName();const dosen=$("namaDosen").value,mk=$("qrCourse").value,p=$("qrMeeting").value,dur=Number($("qrDuration").value),nip=localStorage.getItem("userId");
+  if(LECTURER_ACCOUNTS[nip])$("namaDosen").value=LECTURER_ACCOUNTS[nip];
+  const token=generateToken(),end=Date.now()+dur*60000;
+  activeSession={token,nip,mataKuliah:mk,pertemuan:String(p),dosen:$("namaDosen").value,berakhir:end};qrEnd=end;
+  $("qrTitle").textContent=`${mk} • Pertemuan ${p}`;$("qrToken").textContent=token;
+  $("qrcode").innerHTML="";new QRCode($("qrcode"),{text:["ABS",token,nip,mk,String(p),String(end)].join("|"),width:260,height:260,colorDark:"#0f172a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+  clearInterval(qrTimer);qrTimer=setInterval(updateQRTimer,1000);updateQRTimer();updateLecturerStats();toast("QR absensi berhasil dibuat.");
+}
+function updateQRTimer(){
+  const left=qrEnd-Date.now();
+  if(left<=0){closeQR();return}
+  const m=Math.floor(left/60000),s=Math.floor(left/1000)%60;$("qrTimer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  $("qrStatus").textContent="🟢 Absensi Terbuka";$("qrStatus").className="status on";$("dStatus").textContent="ON";
+}
+function closeQR(){
+  clearInterval(qrTimer);qrEnd=0;activeSession=null;$("qrTimer").textContent="00:00";$("qrStatus").textContent="🔴 Absensi Ditutup";$("qrStatus").className="status off";$("dStatus").textContent="OFF";toast("Sesi absensi ditutup.");
+}
+function generateToken(){const c="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";return Array.from({length:12},()=>c[Math.floor(Math.random()*c.length)]).join("")}
+function updateLecturerStats(){
+  const d=getData(),u=new Set(d.map(x=>x.nim).filter(Boolean));$("dTotal").textContent=d.length;$("dUnique").textContent=u.size;$("dCourses").textContent=COURSES.length;
+}
+function renderLecturerTable(){
+  const fmk=$("filterCourse").value,fp=$("filterMeeting").value,fd=$("filterLecturer").value,q=$("searchStudent").value.toLowerCase().trim();
+  let d=getData().filter(x=>(!fmk||x.mataKuliah===fmk)&&(!fp||String(x.pertemuan)===String(fp).replace("Pertemuan ",""))&&(!fd||x.dosen===fd)&&(!q||String(x.nim).toLowerCase().includes(q)||String(x.nama).toLowerCase().includes(q))).reverse();
+  $("foundTotal").textContent=d.length;$("foundUnique").textContent=new Set(d.map(x=>x.nim)).size;
+  $("lecturerTable").innerHTML=d.length?d.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.nim)}</td><td>${esc(x.nama||studentName(x.nim)||"-")}</td><td>${esc(x.mataKuliah)}</td><td>${esc(x.pertemuan)}</td><td>${esc(x.waktu)}</td><td>${esc(x.dosen||"-")}</td><td><span class="badge ok">✓ Hadir</span></td></tr>`).join(""):'<tr><td colspan="8" class="empty">Belum ada data absensi.</td></tr>';
+  updateLecturerStats();
+}
+function resetFilters(){$("filterCourse").value="";$("filterMeeting").value="";$("filterLecturer").value="";$("searchStudent").value="";renderLecturerTable()}
+function refreshLecturer(){renderLecturerTable();toast("Data berhasil diperbarui.")}
+function renderLecturerCourseCards(){$("lecturerCourseCards").innerHTML=COURSES.map(c=>`<div class="course"><span class="code">${c.code}</span><h4>${esc(c.name)}</h4><p>👨‍🏫 ${esc(c.lecturer)}</p><div style="margin-top:12px"><span class="badge" style="background:#eff6ff;color:#1d4ed8">Tersedia</span></div></div>`).join("")}
+function exportLecturerCSV(){
+  const fmk=$("filterCourse")?.value||"",fp=$("filterMeeting")?.value||"",fd=$("filterLecturer")?.value||"",q=$("searchStudent")?.value.toLowerCase().trim()||"";
+  const d=getData().filter(x=>(!fmk||x.mataKuliah===fmk)&&(!fp||String(x.pertemuan)===String(fp).replace("Pertemuan ",""))&&(!fd||x.dosen===fd)&&(!q||String(x.nim).toLowerCase().includes(q)||String(x.nama).toLowerCase().includes(q)));
+  downloadCSV([["No","NIM","Nama","Mata Kuliah","Pertemuan","Waktu","Dosen","Status"],...d.map((x,i)=>[i+1,x.nim,x.nama,x.mataKuliah,x.pertemuan,x.waktu,x.dosen||"-",x.status||"Hadir"])] ,"Rekap_Absensi_Mahasiswa.csv");
+}
+function downloadCSV(rows,name){
+  if(rows.length<=1){toast("Tidak ada data untuk diekspor.","error");return}
+  const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n"),blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);toast("File CSV berhasil dibuat.");
+}
+function clearAllAttendance(){
+  if(confirm("Hapus seluruh data absensi di browser ini? Tindakan ini tidak dapat dibatalkan.")){localStorage.removeItem("attendanceData");renderLecturerTable();updateLecturerStats();if(role==="mahasiswa")updateStudentStats();toast("Semua data absensi dihapus.")}
+}
+
+/* =========================================================
+   SINKRONISASI ANTAR TAB + AUTO LOGIN
+   ========================================================= */
+window.addEventListener("storage",e=>{if(e.key==="attendanceData"){if(role==="mahasiswa"){updateStudentStats();renderStudentTable()}else{renderLecturerTable();updateLecturerStats()}}});
+try{const ch=new BroadcastChannel("absensi-channel");ch.onmessage=()=>{if(role==="mahasiswa"){updateStudentStats();renderStudentTable()}else{renderLecturerTable();updateLecturerStats()}}}catch{}
+window.addEventListener("load",()=>{const r=localStorage.getItem("userRole"),id=localStorage.getItem("userId");if(r&&id){$("loginScreen").style.display="none";$("app").style.display="block";initApp()}});
+$("roleId").addEventListener("keydown",e=>{if(e.key==="Enter")loginRole()});
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")loginWebsite()});
+</script>
+</body>
+</html>
